@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 320px;
+      padding: 16px;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      background: #f8f9fa;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .logo {
+      width: 32px;
+      height: 32px;
+      background: #0073E6;
+      border-radius: 8px;
+      margin: 0 auto 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+    
+    h1 {
+      margin: 0;
+      font-size: 16px;
+      color: #333;
+      font-weight: 600;
+    }
+    
+    .subtitle {
+      color: #666;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+    
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      border: 1px solid #e9ecef;
+    }
+    
+    .status-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #dc3545;
+    }
+    
+    .status-dot.active {
+      background: #28a745;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.6; }
+      100% { opacity: 1; }
+    }
+    
+    .toggle-btn {
+      background: #0073E6;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+    
+    .toggle-btn:hover {
+      background: #0056b3;
+    }
+    
+    .toggle-btn.stop {
+      background: #dc3545;
+    }
+    
+    .toggle-btn.stop:hover {
+      background: #c82333;
+    }
+    
+    .settings {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+      margin-bottom: 16px;
+    }
+    
+    .setting-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    
+    .setting-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .setting-label {
+      font-size: 13px;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .input-group {
+      margin-bottom: 12px;
+    }
+    
+    .input-label {
+      display: block;
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    
+    .input-field {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 12px;
+      box-sizing: border-box;
+    }
+    
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+    
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+      background-color: #0073E6;
+    }
+    
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    
+    .stats {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+      margin-bottom: 16px;
+    }
+    
+    .stats-title {
+      font-size: 13px;
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .stat-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 12px;
+    }
+    
+    .stat-label {
+      color: #666;
+    }
+    
+    .stat-value {
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .footer {
+      text-align: center;
+      color: #999;
+      font-size: 11px;
+      margin-top: 16px;
+    }
+    
+    .test-btn {
+      width: 100%;
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      margin-top: 8px;
+    }
+    
+    .test-btn:hover {
+      background: #218838;
+    }
+    
+    .connection-status {
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      text-align: center;
+      margin-top: 8px;
+    }
+    
+    .connection-status.connected {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .connection-status.disconnected {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">SF</div>
+    <h1>SAP Click Capture</h1>
+    <div class="subtitle">SuccessFactors Task Generator</div>
+  </div>
+  
+  <div class="status">
+    <div class="status-info">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Capture Inactive</span>
+    </div>
+    <button class="toggle-btn" id="toggleBtn">Start</button>
+  </div>
+  
+  <div class="settings">
+    <div class="input-group">
+      <label class="input-label" for="serverUrl">Application Server URL:</label>
+      <input type="text" id="serverUrl" class="input-field" placeholder="http://127.0.0.1:5000">
+      <div class="connection-status connected" style="display: block;">
+        ✓ Extension ready - click Start on SAP pages to begin capturing
+      </div>
+    </div>
+    
+    <div class="setting-row">
+      <span class="setting-label">Auto Task Generation</span>
+      <label class="switch">
+        <input type="checkbox" id="autoTaskGeneration" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+  
+  <div class="stats">
+    <div class="stats-title">Session Statistics</div>
+    <div class="stat-item">
+      <span class="stat-label">Clicks Captured:</span>
+      <span class="stat-value" id="clicksCount">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Tasks Generated:</span>
+      <span class="stat-value" id="tasksCount">0</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-label">Current Page:</span>
+      <span class="stat-value" id="currentPage">Not SAP SF</span>
+    </div>
+  </div>
+  
+  <div class="footer">
+    Click elements in SAP SuccessFactors to generate tasks automatically
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
