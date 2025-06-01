@@ -1,4 +1,5 @@
-// SAP SuccessFactors Click Capture Popup Script
+// Add authentication logic to popup.js
+let isAuthenticated = false;
 
 let currentSettings = {
   captureEnabled: false,
@@ -11,8 +12,10 @@ let sessionStats = {
   tasksCount: 0
 };
 
-// Initialize popup
 document.addEventListener('DOMContentLoaded', function() {
+  checkAuthStatus();
+  
+  document.getElementById('loginBtn').addEventListener('click', handleLogin);
   loadSettings();
   updateUI();
   setupEventListeners();
@@ -20,7 +23,59 @@ document.addEventListener('DOMContentLoaded', function() {
   loadSessionStats();
 });
 
-// Load settings from storage
+async function checkAuthStatus() {
+  try {
+    const response = await fetch(`${currentSettings.serverUrl}/api/auth/status`, {
+      credentials: 'include'
+    });
+    
+    isAuthenticated = response.ok;
+    updateAuthUI();
+  } catch (error) {
+    console.error('Auth check failed:', error);
+    isAuthenticated = false;
+    updateAuthUI();
+  }
+}
+
+async function handleLogin() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  
+  try {
+    const response = await fetch(`${currentSettings.serverUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+      credentials: 'include'
+    });
+    
+    if (response.ok) {
+      isAuthenticated = true;
+      updateAuthUI();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  } catch (error) {
+    console.error('Login failed:', error);
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function updateAuthUI() {
+  const loginForm = document.getElementById('loginForm');
+  const mainContent = document.getElementById('mainContent');
+  
+  if (isAuthenticated) {
+    loginForm.style.display = 'none';
+    mainContent.style.display = 'block';
+    loadSettings();
+  } else {
+    loginForm.style.display = 'block';
+    mainContent.style.display = 'none';
+  }
+}
+
 function loadSettings() {
   chrome.runtime.sendMessage({ action: 'getSettings' }, function(response) {
     if (response) {
@@ -30,7 +85,6 @@ function loadSettings() {
   });
 }
 
-// Update UI elements
 function updateUI() {
   const statusDot = document.getElementById('statusDot');
   const statusText = document.getElementById('statusText');
@@ -38,7 +92,6 @@ function updateUI() {
   const serverUrl = document.getElementById('serverUrl');
   const autoTaskGeneration = document.getElementById('autoTaskGeneration');
   
-  // Update status
   if (currentSettings.captureEnabled) {
     statusDot.classList.add('active');
     statusText.textContent = 'Capture Active';
@@ -51,36 +104,28 @@ function updateUI() {
     toggleBtn.classList.remove('stop');
   }
   
-  // Update form fields
   serverUrl.value = currentSettings.serverUrl;
   autoTaskGeneration.checked = currentSettings.autoTaskGeneration;
 }
 
-// Setup event listeners
 function setupEventListeners() {
-  // Toggle capture button
   document.getElementById('toggleBtn').addEventListener('click', function() {
     currentSettings.captureEnabled = !currentSettings.captureEnabled;
     saveSettings();
     updateUI();
   });
   
-  // Server URL input
   document.getElementById('serverUrl').addEventListener('change', function() {
     currentSettings.serverUrl = this.value;
     saveSettings();
   });
   
-  // Auto task generation toggle
   document.getElementById('autoTaskGeneration').addEventListener('change', function() {
     currentSettings.autoTaskGeneration = this.checked;
     saveSettings();
   });
-  
-  // Server URL change updates settings automatically
 }
 
-// Save settings
 function saveSettings() {
   chrome.runtime.sendMessage({ 
     action: 'saveSettings', 
@@ -92,7 +137,6 @@ function saveSettings() {
   });
 }
 
-// Test connection to application server
 async function testConnection() {
   const statusElement = document.getElementById('connectionStatus');
   const testBtn = document.getElementById('testConnection');
@@ -115,7 +159,6 @@ async function testConnection() {
       statusElement.textContent = '✓ Connected successfully';
       statusElement.classList.add('connected');
       
-      // Update stats from server
       sessionStats.tasksCount = data.tasksGenerated || 0;
       updateStats();
     } else {
@@ -127,14 +170,12 @@ async function testConnection() {
   } finally {
     testBtn.disabled = false;
     
-    // Hide status after 3 seconds
     setTimeout(() => {
       statusElement.style.display = 'none';
     }, 3000);
   }
 }
 
-// Check current tab to see if it's a SAP page
 function checkCurrentTab() {
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     const currentTab = tabs[0];
@@ -153,7 +194,6 @@ function checkCurrentTab() {
       const isSAPPage = sapDomains.some(domain => currentTab.url.includes(domain));
       
       if (isSAPPage) {
-        // Try to extract section from URL
         const url = new URL(currentTab.url);
         const pathParts = url.pathname.split('/').filter(p => p);
         let section = 'Explorer';
@@ -190,9 +230,7 @@ function checkCurrentTab() {
   });
 }
 
-// Load session statistics
 function loadSessionStats() {
-  // Get from local storage
   chrome.storage.local.get(['sessionStats'], function(result) {
     if (result.sessionStats) {
       sessionStats = { ...sessionStats, ...result.sessionStats };
@@ -200,7 +238,6 @@ function loadSessionStats() {
     }
   });
   
-  // Also try to get latest from server
   if (currentSettings.serverUrl) {
     fetch(`${currentSettings.serverUrl}/api/statistics`)
       .then(response => response.json())
@@ -214,16 +251,13 @@ function loadSessionStats() {
   }
 }
 
-// Update statistics display
 function updateStats() {
   document.getElementById('clicksCount').textContent = sessionStats.clicksCount;
   document.getElementById('tasksCount').textContent = sessionStats.tasksCount;
   
-  // Save to local storage
   chrome.storage.local.set({ sessionStats: sessionStats });
 }
 
-// Listen for messages from content script
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'updateStats') {
     sessionStats.clicksCount += 1;
